@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+
+if [ -f $1/gulpfile.js ]; then
+  echo "Gulp"
+  exit 0
+else
+  echo "no gulpfile"
+  exit 1
+fi
