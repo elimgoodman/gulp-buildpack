@@ -31,6 +31,8 @@ PATH=$build_dir/vendor/node/bin:$PATH
 # Run subsequent node/npm commands from the build path
 cd $build_dir
 
+ls
+
 npm install
 echo "-----> Found gulpfile, running gulp deploy task"
 $build_dir/node_modules/.bin/gulp deploy
