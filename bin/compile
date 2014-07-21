@@ -90,4 +90,4 @@ $build_dir/node_modules/.bin/gulp deploy
 
 ##### Write the revision version to the config file
 echo "-----> Writing revision to config file"
-echo `date +"%s"` > conf/asset-version.conf
+echo assetVersion=\"`date +"%s"`\" > conf/asset-version.conf
