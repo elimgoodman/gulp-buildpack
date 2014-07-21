@@ -9,7 +9,7 @@ build_dir=$1
 cache_dir=$2
 env_dir=$3
 
-node_version = "0.10.29"
+node_version="0.10.29"
 
 bp_dir=$(cd $(dirname $0); cd ..; pwd)
 
