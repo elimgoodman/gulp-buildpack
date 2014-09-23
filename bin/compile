@@ -19,8 +19,13 @@ source $bp_dir/bin/common.sh
 # Output npm debug info on error
 trap cat_npm_debug_log ERR
 
-#We don't have md5 installed so we'll use wc as a really crappy hash...
-package_hash=`wc -l $build_dir/package.json`
+package_hash=`md5sum $build_dir/package.json`
+scripts_hash=`tar c $build_dir/public/javascripts/ | md5sum`
+styles_hash=`tar c $build_dir/public/stylesheets/ | md5sum`
+
+if test -f $cache_dir/node/.heroku/scripts-hash && test -f $cache_dir/node/.heroku/styles-hash && [ $(cat $cache_dir/node/.heroku/scripts-hash) = "$scripts_hash" ] && [ $(cat $cache_dir/node/.heroku/styles-hash) = "$styles_hash" ]; then
+  status "No static resources have been modified since last commit, skipping entirely"
+fi
 
 # Download node from Heroku's S3 mirror of nodejs.org/dist
 status "Downloading and installing node"
@@ -81,6 +86,8 @@ echo $node_version > $build_dir/.heroku/node-version
 
 # Save package hash in the slug
 echo $package_hash > $build_dir/.heroku/package-hash
+echo $scripts_hash > $build_dir/.heroku/scripts-hash
+echo $styles_hash > $build_dir/.heroku/styles-hash
 
 # Copy goodies to the cache
 cp -r $build_dir/.heroku $cache_dir/node
@@ -90,8 +97,18 @@ rm -rf "$build_dir/.node-gyp"
 rm -rf "$build_dir/.npm"
 
 ##### Gulp stuff
-status "Found gulpfile, running gulp deploy task"
-$build_dir/node_modules/.bin/gulp deploy
+status "Found gulpfile"
+if test -f $cache_dir/node/.heroku/scripts-hash && [ $(cat $cache_dir/node/.heroku/scripts-hash) = "$scripts_hash" ]; then
+  status "No script resources have been modified since last commit, skipping"
+else
+  $build_dir/node_modules/.bin/gulp scripts-prod
+fi
+
+if test -f $cache_dir/node/.heroku/styles-hash && [ $(cat $cache_dir/node/.heroku/styles-hash) = "$styles_hash" ]; then
+  status "No style resources have been modified since last commit, skipping"
+else
+  $build_dir/node_modules/.bin/gulp styles-prod
+fi
 
 ##### Write the revision version to the config file
 status "Writing revision to config file"
