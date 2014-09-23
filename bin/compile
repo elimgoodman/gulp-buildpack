@@ -23,7 +23,11 @@ package_hash=`md5sum $build_dir/package.json`
 scripts_hash=`tar c $build_dir/public/javascripts/ | md5sum`
 styles_hash=`tar c $build_dir/public/stylesheets/ | md5sum`
 
-if test -f $cache_dir/node/.heroku/scripts-hash && test -f $cache_dir/node/.heroku/styles-hash && [ $(cat $cache_dir/node/.heroku/scripts-hash) = "$scripts_hash" ] && [ $(cat $cache_dir/node/.heroku/styles-hash) = "$styles_hash" ]; then
+old_package_hash=`cat $cache_dir/node/.heroku/package-hash`
+old_scripts_hash=`cat $cache_dir/node/.heroku/scripts-hash`
+old_styles_hash=`cat $cache_dir/node/.heroku/styles-hash`
+
+if test -f $cache_dir/node/.heroku/scripts-hash && test -f $cache_dir/node/.heroku/styles-hash && [ "$old_scripts_hash" == "$scripts_hash" ] && [ "$old_styles_hash" == "$styles_hash" ]; then
   status "No static resources have been modified since last commit, skipping entirely"
 fi
 
@@ -47,7 +51,7 @@ if test -d $build_dir/node_modules; then
   status "Found existing node_modules directory; skipping cache"
   status "Rebuilding any native dependencies"
   npm rebuild 2>&1 | indent
-elif test -d $cache_dir/node/node_modules && test -f $cache_dir/node/.heroku/package-hash && [ $(cat $cache_dir/node/.heroku/package-hash) = "$package_hash" ]; then
+elif test -d $cache_dir/node/node_modules && test -f $cache_dir/node/.heroku/package-hash && [ "$old_package_hash" == "$package_hash" ]; then
   status "Restoring node_modules directory from cache"
   cp -r $cache_dir/node/node_modules $build_dir/
 
@@ -98,13 +102,13 @@ rm -rf "$build_dir/.npm"
 
 ##### Gulp stuff
 status "Found gulpfile"
-if test -f $cache_dir/node/.heroku/scripts-hash && [ $(cat $cache_dir/node/.heroku/scripts-hash) = "$scripts_hash" ]; then
+if test -f $cache_dir/node/.heroku/scripts-hash && [ "$old_scripts_hash" = "$scripts_hash" ]; then
   status "No script resources have been modified since last commit, skipping"
 else
   $build_dir/node_modules/.bin/gulp scripts-prod
 fi
 
-if test -f $cache_dir/node/.heroku/styles-hash && [ $(cat $cache_dir/node/.heroku/styles-hash) = "$styles_hash" ]; then
+if test -f $cache_dir/node/.heroku/styles-hash && [ "$old_styles_hash" = "$styles_hash" ]; then
   status "No style resources have been modified since last commit, skipping"
 else
   $build_dir/node_modules/.bin/gulp styles-prod
