@@ -19,9 +19,9 @@ source $bp_dir/bin/common.sh
 # Output npm debug info on error
 trap cat_npm_debug_log ERR
 
-package_hash=`md5sum $build_dir/package.json`
-scripts_hash=`tar c $build_dir/public/javascripts/ | md5sum`
-styles_hash=`tar c $build_dir/public/stylesheets/ | md5sum`
+package_hash=`md5sum $build_dir/package.json | awk '{print $1}'`
+scripts_hash=`find public/javascripts/ -type f -name "*.js" -exec md5sum {} + | awk '{print $1}' | sort | md5sum | awk '{print $1}'`
+styles_hash=`find public/stylesheets/ -type f -name "*.less" -exec md5sum {} + | awk '{print $1}' | sort | md5sum | awk '{print $1}'`
 
 old_package_hash=`cat $cache_dir/node/.heroku/package-hash`
 old_scripts_hash=`cat $cache_dir/node/.heroku/scripts-hash`
