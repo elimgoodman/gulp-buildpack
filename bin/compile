@@ -19,10 +19,8 @@ source $bp_dir/bin/common.sh
 # Output npm debug info on error
 trap cat_npm_debug_log ERR
 
-#We don't have md5 installed so we'll use stat as a really crappy hash...
-package_hash=`stat $build_dir/package.json`
-status "package.json stat:"
-status $package_hash
+#We don't have md5 installed so we'll use wc as a really crappy hash...
+package_hash=`wc -l $build_dir/package.json`
 
 # Download node from Heroku's S3 mirror of nodejs.org/dist
 status "Downloading and installing node"
