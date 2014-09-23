@@ -10,6 +10,7 @@ cache_dir=$2
 env_dir=$3
 
 node_version="0.10.29"
+package_hash=`md5 $build_dir/package.json`
 
 bp_dir=$(cd $(dirname $0); cd ..; pwd)
 
@@ -35,23 +36,23 @@ cd $build_dir
 
 # If node_modules directory is checked into source control then
 # rebuild any native deps. Otherwise, restore from the build cache.
-# if test -d $build_dir/node_modules; then
-#   status "Found existing node_modules directory; skipping cache"
-#   status "Rebuilding any native dependencies"
-#   npm rebuild 2>&1 | indent
-# elif test -d $cache_dir/node/node_modules; then
-#   status "Restoring node_modules directory from cache"
-#   cp -r $cache_dir/node/node_modules $build_dir/
+if test -d $build_dir/node_modules; then
+  status "Found existing node_modules directory; skipping cache"
+  status "Rebuilding any native dependencies"
+  npm rebuild 2>&1 | indent
+elif test -d $cache_dir/node/node_modules && test -f $cache_dir/node/.heroku/package-hash && [ $(cat $cache_dir/node/.heroku/package-hash) = "$package_hash" ]; then
+  status "Restoring node_modules directory from cache"
+  cp -r $cache_dir/node/node_modules $build_dir/
 
-#   status "Pruning cached dependencies not specified in package.json"
-#   npm prune 2>&1 | indent
+  status "Pruning cached dependencies not specified in package.json"
+  npm prune 2>&1 | indent
 
-#   if test -f $cache_dir/node/.heroku/node-version && [ $(cat $cache_dir/node/.heroku/node-version) != "$node_version" ]; then
-#     status "Node version changed since last build; rebuilding dependencies"
-#     npm rebuild 2>&1 | indent
-#   fi
+  if test -f $cache_dir/node/.heroku/node-version && [ $(cat $cache_dir/node/.heroku/node-version) != "$node_version" ]; then
+    status "Node version changed since last build; rebuilding dependencies"
+    npm rebuild 2>&1 | indent
+  fi
 
-# else
+else
   status "Installing dependencies"
   # Make npm output to STDOUT instead of its default STDERR
   npm install | indent
@@ -76,6 +77,9 @@ mkdir -p $build_dir/.heroku
 # Save resolved node version in the slug for later reference
 echo $node_version > $build_dir/.heroku/node-version
 
+# Save package hash in the slug
+echo $package_hash > $build_dir/.heroku/package-hash
+
 # Copy goodies to the cache
 cp -r $build_dir/.heroku $cache_dir/node
 
@@ -83,11 +87,13 @@ status "Cleaning up node-gyp and npm artifacts"
 rm -rf "$build_dir/.node-gyp"
 rm -rf "$build_dir/.npm"
 
-
 ##### Gulp stuff
-echo "-----> Found gulpfile, running gulp deploy task"
+status "Found gulpfile, running gulp deploy task"
 $build_dir/node_modules/.bin/gulp deploy
 
 ##### Write the revision version to the config file
-echo "-----> Writing revision to config file"
+status "Writing revision to config file"
 echo assetVersion=\"`date +"%s"`\" > conf/asset-version.conf
+
+status "Removing node modules"
+rm -rf "$build_dir/node_modules"
