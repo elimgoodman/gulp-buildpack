@@ -27,17 +27,17 @@ old_package_hash=`cat $cache_dir/node/.heroku/package-hash`
 old_scripts_hash=`cat $cache_dir/node/.heroku/scripts-hash`
 old_styles_hash=`cat $cache_dir/node/.heroku/styles-hash`
 
-status "Package hashes:"
-status "$package_hash"
-status "$old_package_hash"
+# status "Package hashes:"
+# status "$package_hash"
+# status "$old_package_hash"
 
-status "Script hashes:"
-status "$scripts_hash"
-status "$old_scripts_hash"
+# status "Script hashes:"
+# status "$scripts_hash"
+# status "$old_scripts_hash"
 
-status "Styles hashes:"
-status "$styles_hash"
-status "$old_styles_hash"
+# status "Styles hashes:"
+# status "$styles_hash"
+# status "$old_styles_hash"
 
 if test -f $cache_dir/node/.heroku/scripts-hash && test -f $cache_dir/node/.heroku/styles-hash && [ "$old_scripts_hash" == "$scripts_hash" ] && [ "$old_styles_hash" == "$styles_hash" ]; then
   status "No static resources have been modified since last commit, skipping entirely"
