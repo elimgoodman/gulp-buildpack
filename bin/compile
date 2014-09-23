@@ -11,11 +11,6 @@ env_dir=$3
 
 node_version="0.10.29"
 
-#We don't have md5 installed so we'll use stat as a really crappy hash...
-package_hash=`stat $build_dir/package.json`
-status "package.json stat:"
-status $package_hash
-
 bp_dir=$(cd $(dirname $0); cd ..; pwd)
 
 # Load some convenience functions like status(), echo(), and indent()
@@ -23,6 +18,11 @@ source $bp_dir/bin/common.sh
 
 # Output npm debug info on error
 trap cat_npm_debug_log ERR
+
+#We don't have md5 installed so we'll use stat as a really crappy hash...
+package_hash=`stat $build_dir/package.json`
+status "package.json stat:"
+status $package_hash
 
 # Download node from Heroku's S3 mirror of nodejs.org/dist
 status "Downloading and installing node"
