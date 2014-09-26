@@ -39,10 +39,6 @@ old_styles_hash=`cat $cache_dir/node/.heroku/styles-hash`
 # status "$styles_hash"
 # status "$old_styles_hash"
 
-if test -f $cache_dir/node/.heroku/scripts-hash && test -f $cache_dir/node/.heroku/styles-hash && [ "$old_scripts_hash" == "$scripts_hash" ] && [ "$old_styles_hash" == "$styles_hash" ]; then
-  status "No static resources have been modified since last commit, skipping entirely"
-fi
-
 # Download node from Heroku's S3 mirror of nodejs.org/dist
 status "Downloading and installing node"
 node_url="http://s3pository.heroku.com/node/v0.10.29/node-v0.10.29-linux-x64.tar.gz"
@@ -114,17 +110,8 @@ rm -rf "$build_dir/.npm"
 
 ##### Gulp stuff
 status "Found gulpfile"
-if test -f $cache_dir/node/.heroku/scripts-hash && [ "$old_scripts_hash" = "$scripts_hash" ]; then
-  status "No script resources have been modified since last commit, skipping"
-else
-  $build_dir/node_modules/.bin/gulp scripts-prod
-fi
-
-if test -f $cache_dir/node/.heroku/styles-hash && [ "$old_styles_hash" = "$styles_hash" ]; then
-  status "No style resources have been modified since last commit, skipping"
-else
-  $build_dir/node_modules/.bin/gulp styles-prod
-fi
+$build_dir/node_modules/.bin/gulp scripts-prod
+$build_dir/node_modules/.bin/gulp styles-prod
 
 ##### Write the revision version to the config file
 status "Writing revision to config file"
