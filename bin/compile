@@ -110,8 +110,27 @@ rm -rf "$build_dir/.npm"
 
 ##### Gulp stuff
 status "Found gulpfile"
-$build_dir/node_modules/.bin/gulp scripts-prod
-$build_dir/node_modules/.bin/gulp styles-prod
+if test -f $cache_dir/node/.heroku/scripts-hash && test -d $cache_dir/scripts && [ "$old_scripts_hash" = "$scripts_hash" ]; then
+  status "No script resources have been modified since last commit, restoring from cache"
+  mkdir -p $build_dir/public/build
+  cp -r $cache_dir/scripts $build_dir/public/build/scripts
+else
+  $build_dir/node_modules/.bin/gulp scripts-prod
+fi
+
+if test -f $cache_dir/node/.heroku/styles-hash && test -d $cache_dir/styles && [ "$old_styles_hash" = "$styles_hash" ]; then
+  status "No style resources have been modified since last commit, restoring from cache"
+  mkdir -p $build_dir/public/build
+  cp -r $cache_dir/styles $build_dir/public/build/styles
+else
+  $build_dir/node_modules/.bin/gulp styles-prod
+fi
+
+status "Caching compiled scripts"
+cp -r $build_dir/public/build/js $cache_dir/scripts
+
+status "Caching compiled styles"
+cp -r $build_dir/public/build/css $cache_dir/styles
 
 ##### Write the revision version to the config file
 status "Writing revision to config file"
