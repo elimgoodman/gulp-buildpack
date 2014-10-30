@@ -23,9 +23,23 @@ package_hash=`md5sum $build_dir/package.json | awk '{print $1}'`
 scripts_hash=`find $build_dir/public/javascripts/ -type f -name "*.js" -exec md5sum {} + | awk '{print $1}' | sort | md5sum | awk '{print $1}'`
 styles_hash=`find $build_dir/public/stylesheets/ -type f -name "*.less" -exec md5sum {} + | awk '{print $1}' | sort | md5sum | awk '{print $1}'`
 
-old_package_hash=`cat $cache_dir/node/.heroku/package-hash`
-old_scripts_hash=`cat $cache_dir/node/.heroku/scripts-hash`
-old_styles_hash=`cat $cache_dir/node/.heroku/styles-hash`
+if test -f $cache_dir/node/.heroku/package-hash; then
+  old_package_hash=`cat $cache_dir/node/.heroku/package-hash`
+else
+  old_package_hash=""
+fi
+
+if test -f $cache_dir/node/.heroku/scripts-hash; then
+  old_scripts_hash=`cat $cache_dir/node/.heroku/scripts-hash`
+else
+  old_scripts_hash=""
+fi
+
+if test -f $cache_dir/node/.heroku/styles-hash; then
+  old_styles_hash=`cat $cache_dir/node/.heroku/styles-hash`
+else
+  old_styles_hash=""
+fi
 
 # status "Package hashes:"
 # status "$package_hash"
