@@ -124,7 +124,7 @@ rm -rf "$build_dir/.npm"
 
 ##### Gulp stuff
 status "Found gulpfile"
-if test -f $cache_dir/node/.heroku/scripts-hash && test -d $cache_dir/scripts && [ "$old_scripts_hash" = "$scripts_hash" ]; then
+if test -f $cache_dir/node/.heroku/scripts-hash && test -d $cache_dir/scripts && test -d $cache_dir/scripts/js && [ "$old_scripts_hash" = "$scripts_hash" ]; then
   status "No script resources have been modified since last commit, restoring from cache"
   mkdir -p $build_dir/public/build
   cp -r $cache_dir/scripts/js $build_dir/public/build
@@ -132,7 +132,7 @@ else
   $build_dir/node_modules/.bin/gulp scripts-prod
 fi
 
-if test -f $cache_dir/node/.heroku/styles-hash && test -d $cache_dir/styles && [ "$old_styles_hash" = "$styles_hash" ]; then
+if test -f $cache_dir/node/.heroku/styles-hash && test -d $cache_dir/styles && test -d $cache_dir/styles/css && [ "$old_styles_hash" = "$styles_hash" ]; then
   status "No style resources have been modified since last commit, restoring from cache"
   mkdir -p $build_dir/public/build
   cp -r $cache_dir/styles/css $build_dir/public/build
